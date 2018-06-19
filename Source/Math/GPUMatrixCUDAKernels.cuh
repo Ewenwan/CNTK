@@ -5187,7 +5187,7 @@ __global__ void _computeBiVfsmnMemory(
     const CUDA_LONG l_stride, const CUDA_LONG r_stride,
     ElemType* out)             // D x T
 {
-    // TODO: process flags[x] == -1 (GAP sentence)
+    // TODO: process flags[x] == 0 (GAP sentence)
 
     CUDA_LONG id = blockDim.x * blockIdx.x + threadIdx.x;
     if (id >= N)
@@ -5198,6 +5198,13 @@ __global__ void _computeBiVfsmnMemory(
     ElemType value = 0.0;
     int shift_index = 0;
     int index = col * rows + row;
+
+    if (flags[col] == 0) // GAP_SEQUENCE_ID
+    {
+        out[index] = 0.0;
+        return;
+    }
+
     out[index] = in[index];
     for (int order = 0; order < l_order; order++)
     {
@@ -5229,7 +5236,7 @@ __global__ void _computeBiVfsmnMemoryGradient(
     const CUDA_LONG l_stride, const CUDA_LONG r_stride,
     ElemType* out)             // D x T, input gradient
 {
-    // TODO: process flags[x] == -1 (GAP sentence)
+    // TODO: process flags[x] == 0 (GAP sentence)
 
     CUDA_LONG id = blockDim.x * blockIdx.x + threadIdx.x;
     if (id >= N)
@@ -5240,6 +5247,13 @@ __global__ void _computeBiVfsmnMemoryGradient(
     ElemType value = 0.0;
     int shift_index = 0;
     int index = col * rows + row;
+
+    if (flags[col] == 0) // GAP_SEQUENCE_ID
+    {
+        out[index] = 0.0;
+        return;
+    }
+
     out[index] = in[index];
     for (int order = -r_order; order < 0; order++)
     {
@@ -5288,7 +5302,7 @@ __global__ void _computeBiVfsmnLeftFilterGradient(
 
     if (steps > 1)
     {
-        if (col >= 0 && fabs_(flags[threadIdx.x] - flags[col])<1e-2)
+        if (col >= 0 && fabs_(flags[threadIdx.x] - flags[col])<1e-2 && flags[col] != 0)
         {
             aux[threadIdx.x] = in[row + col*rows] * diff[row + threadIdx.x*rows];
         }
@@ -5301,14 +5315,14 @@ __global__ void _computeBiVfsmnLeftFilterGradient(
         {
             int index = threadIdx.x + i*THREADS;
 
-            if (index < cols && fabs_(flags[index] - flags[index - shift])<1e-2)
+            if (index < cols && fabs_(flags[index] - flags[index - shift])<1e-2 && flags[index] != 0)
                 aux[threadIdx.x] += in[(index - shift)*rows + row] * diff[index*rows + row];
         }
         __syncthreads();
     }
     else
     {
-        if (col >= 0 && threadIdx.x<cols && fabs_(flags[threadIdx.x] - flags[col])<1e-2)
+        if (col >= 0 && threadIdx.x<cols && fabs_(flags[threadIdx.x] - flags[col])<1e-2 && flags[col] != 0)
         {
             aux[threadIdx.x] = in[row + col*rows] * diff[row + threadIdx.x*rows];
         }
@@ -5365,7 +5379,7 @@ __global__ void _computeBiVfsmnRightFilterGradient(
 
     if (steps > 1)
     {
-        if (col < cols && fabs_(flags[threadIdx.x] - flags[col])<1e-2)
+        if (col < cols && fabs_(flags[threadIdx.x] - flags[col])<1e-2 && flags[col] != 0)
         {
             aux[threadIdx.x] = in[row + col*rows] * diff[row + threadIdx.x*rows];
         }
@@ -5378,14 +5392,14 @@ __global__ void _computeBiVfsmnRightFilterGradient(
         {
             int index = threadIdx.x + i*THREADS;
 
-            if (index + shift < cols && fabs_(flags[index] - flags[index + shift])<1e-2)
+            if (index + shift < cols && fabs_(flags[index] - flags[index + shift])<1e-2 && flags[index] != 0)
                 aux[threadIdx.x] += in[(index + shift)*rows + row] * diff[index*rows + row];
         }
         __syncthreads();
     }
     else
     {
-        if (col < cols && threadIdx.x<cols && fabs_(flags[threadIdx.x] - flags[col])<1e-2)
+        if (col < cols && threadIdx.x<cols && fabs_(flags[threadIdx.x] - flags[col])<1e-2 && flags[col] != 0)
         {
             aux[threadIdx.x] = in[row + col*rows] * diff[row + threadIdx.x*rows];
         }

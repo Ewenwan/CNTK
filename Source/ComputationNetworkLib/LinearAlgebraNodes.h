@@ -85,7 +85,11 @@ public:
         for (size_t i = 0; i < hidSequences.size(); ++i)
         {
             let& hidSeq = hidSequences[i];
-            ElemType id = (ElemType)(hidSeq.seqId == GAP_SEQUENCE_ID ? -1 : hidSeq.seqId);
+            ElemType id = 0;  // GAP_SEQUENCE_ID, for padding frames
+            if (hidSeq.seqId != GAP_SEQUENCE_ID)
+            {
+                id = hidSeq.seqId + 1;
+            }
             size_t slot = hidSeq.s;
             size_t begin = hidSeq.tBegin >= 0 ? hidSeq.tBegin : 0;
             size_t end = hidSeq.tEnd <= hidMaxLen ? hidSeq.tEnd : hidMaxLen;

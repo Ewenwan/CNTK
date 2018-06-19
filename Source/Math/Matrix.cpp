@@ -6071,6 +6071,23 @@ void Matrix<ElemType>::RCRFTransGrdCompute(const Matrix<ElemType>& lbls,
                             NOT_IMPLEMENTED);
 }
 
+// template<class ElemType>
+// void PrintMatrix(const Matrix<ElemType>& in)
+// {
+//     double temp = 0.0;
+//     std::cout << std::endl;
+//     for (int r = 0; r < in.GetNumRows(); ++r)
+//     {
+//         for (int c = 0; c < in.GetNumCols(); ++c)
+//         {
+//             temp = in(r, c);
+//             std::cout << temp << " ";
+//         }
+//         std::cout << std::endl;
+//     }
+//     std::cout << std::endl;
+// }
+
 template <class ElemType>
 void Matrix<ElemType>::ComputeBiVfsmnMemory(const Matrix<ElemType>& in,      // DxT
                                             const Matrix<ElemType>& l_filter,// DxN1 TODO: +1
@@ -6080,8 +6097,15 @@ void Matrix<ElemType>::ComputeBiVfsmnMemory(const Matrix<ElemType>& in,      // 
                                             int l_stride, int r_stride,
                                             Matrix<ElemType>& out)
 {
-    DecideAndMoveToRightDevice(in, l_filter, r_filter, out);
-    flags._transferToDevice(in.GetDeviceId());
+    // std::cout << "In begining of ComputeBiVfsmnMemory()" << std::endl;
+    // std::cout << l_order << " " << r_order << " " << l_stride << " " << r_stride << std::endl;
+    // PrintMatrix(in);
+    // PrintMatrix(l_filter);
+    // PrintMatrix(r_filter);
+    // PrintMatrix(flags);
+
+    DecideAndMoveToRightDevice(out, in, l_filter, r_filter);
+    flags._transferToDevice(out.GetDeviceId());
 
     if (out.GetDeviceId() < 0) // CPU
     {
@@ -6118,6 +6142,12 @@ void Matrix<ElemType>::ComputeBiVfsmnMemory(const Matrix<ElemType>& in,      // 
             NOT_IMPLEMENTED;
         }
     }
+    // std::cout << out.GetDeviceId() << std::endl;
+    // PrintMatrix(out);
+    // std::cout << out.GetDeviceId() << std::endl;
+    // out._transferToDevice(flags.GetDeviceId());
+    // std::cout << out.GetDeviceId() << std::endl;
+    // std::cout << "At end of ComputeBiVfsmnMemory()" << std::endl;
 }
 
 template <class ElemType>
@@ -6130,6 +6160,13 @@ void Matrix<ElemType>::ComputeBiVfsmnMemoryGradient(
     int l_stride, int r_stride,
     Matrix<ElemType>& inputGradientValues)
 {
+    // std::cout << "In begining of ComputeBiVfsmnMemoryGradient()" << std::endl;
+    // std::cout << l_order << " " << r_order << " " << l_stride << " " << r_stride << std::endl;
+    // PrintMatrix(gradientValues);
+    // PrintMatrix(l_filter);
+    // PrintMatrix(r_filter);
+    // PrintMatrix(flags);
+
     DecideAndMoveToRightDevice(gradientValues, l_filter, r_filter, inputGradientValues);
     flags._transferToDevice(inputGradientValues.GetDeviceId());
 
@@ -6157,6 +6194,8 @@ void Matrix<ElemType>::ComputeBiVfsmnMemoryGradient(
             NOT_IMPLEMENTED;
         }
     }
+    // PrintMatrix(inputGradientValues);
+    // std::cout << "At end of ComputeBiVfsmnMemoryGradient()" << std::endl;
 }
 
 template <class ElemType>
@@ -6167,6 +6206,12 @@ void Matrix<ElemType>::ComputeBiVfsmnLeftFilterGradient(
     int l_order, int l_stride,
     Matrix<ElemType>& leftFilterGradientValues)
 {
+    // std::cout << "In begining of ComputeBiVfsmnLeftFilterGradient()" << std::endl;
+    // std::cout << l_order << " " << l_stride << std::endl;
+    // PrintMatrix(gradientValues);
+    // PrintMatrix(inputValues);
+    // PrintMatrix(flags);
+
     DecideAndMoveToRightDevice(gradientValues, inputValues, flags, leftFilterGradientValues);
 
     if (leftFilterGradientValues.GetDeviceId() < 0) // CPU
@@ -6192,6 +6237,8 @@ void Matrix<ElemType>::ComputeBiVfsmnLeftFilterGradient(
             NOT_IMPLEMENTED;
         }
     }
+    // PrintMatrix(leftFilterGradientValues);
+    // std::cout << "At end of ComputeBiVfsmnLeftFilterGradient()" << std::endl;
 }
 
 template <class ElemType>
@@ -6202,6 +6249,12 @@ void Matrix<ElemType>::ComputeBiVfsmnRightFilterGradient(
     int r_order, int r_stride,
     Matrix<ElemType>& rightFilterGradientValues)
 {
+    // std::cout << "In begining of ComputeBiVfsmnRightFilterGradient()" << std::endl;
+    // std::cout << r_order << " " << r_stride << std::endl;
+    // PrintMatrix(gradientValues);
+    // PrintMatrix(inputValues);
+    // PrintMatrix(flags);
+
     DecideAndMoveToRightDevice(gradientValues, inputValues, flags, rightFilterGradientValues);
 
     if (rightFilterGradientValues.GetDeviceId() < 0) // CPU
@@ -6227,6 +6280,8 @@ void Matrix<ElemType>::ComputeBiVfsmnRightFilterGradient(
             NOT_IMPLEMENTED;
         }
     }
+    // PrintMatrix(rightFilterGradientValues);
+    // std::cout << "At end of ComputeBiVfsmnRightFilterGradient()" << std::endl;
 }
 
 template <class ElemType>
